@@ -2,15 +2,15 @@ from __future__ import annotations
 
 import random
 from typing import Iterator, List, Tuple, TYPE_CHECKING
-import tcod
 
+import tcod
 
 from game_map import GameMap
 import tile_types
 
+
 if TYPE_CHECKING:
     from entity import Entity
-
 
 
 class RectangularRoom:
@@ -31,7 +31,7 @@ class RectangularRoom:
     def inner(self) -> Tuple[slice, slice]:
         """Return the inner area of this room as a 2D array index."""
         return slice(self.x1 + 1, self.x2), slice(self.y1 + 1, self.y2)
-    
+
     def intersects(self, other: RectangularRoom) -> bool:
         """Return True if this room overlaps with another RectangularRoom."""
         return (
@@ -40,11 +40,12 @@ class RectangularRoom:
             and self.y1 <= other.y2
             and self.y2 >= other.y1
         )
-    
+
+
 def tunnel_between(
     start: Tuple[int, int], end: Tuple[int, int]
-    ) -> Iterator[Tuple[int, int]]:
-        #Return an L-shaped tunnel between these two points.
+) -> Iterator[Tuple[int, int]]:
+    """Return an L-shaped tunnel between these two points."""
     x1, y1 = start
     x2, y2 = end
     if random.random() < 0.5:  # 50% chance.
@@ -59,18 +60,18 @@ def tunnel_between(
         yield x, y
     for x, y in tcod.los.bresenham((corner_x, corner_y), (x2, y2)).tolist():
         yield x, y
-    
+
+
 def generate_dungeon(
     max_rooms: int,
     room_min_size: int,
     room_max_size: int,
     map_width: int,
     map_height: int,
-    max_monsters_per_room: int,
     player: Entity,
 ) -> GameMap:
     """Generate a new dungeon map."""
-    dungeon = GameMap(map_width, map_height, entities=[player])
+    dungeon = GameMap(map_width, map_height)
 
     rooms: List[RectangularRoom] = []
 
@@ -99,9 +100,6 @@ def generate_dungeon(
             # Dig out a tunnel between this room and the previous one.
             for x, y in tunnel_between(rooms[-1].center, new_room.center):
                 dungeon.tiles[x, y] = tile_types.floor
-                
-            place_entities(new_room, dungeon, max_monsters_per_room)
-
 
         # Finally, append the new room to the list.
         rooms.append(new_room)
