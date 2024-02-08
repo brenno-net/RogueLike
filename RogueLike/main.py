@@ -25,9 +25,9 @@ def main() -> None:
         "dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
     )
 
-    engine = Engine(player=player)
-
     player = copy.deepcopy(entity_factories.player)
+    
+    engine = Engine(player=player)
     
 
     engine.game_map = generate_dungeon(
